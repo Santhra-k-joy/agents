@@ -1,5 +1,14 @@
 from agents import Agent, WebSearchTool, ModelSettings
 
+import os
+from openai import AsyncOpenAI
+from dotenv import load_dotenv
+load_dotenv()
+from agents import Agent, Runner, trace, function_tool, OpenAIChatCompletionsModel
+AZURE_GIT_BASE_URL = "https://models.inference.ai.azure.com"
+azure_git_client = AsyncOpenAI(base_url=AZURE_GIT_BASE_URL, api_key=os.environ.get("GITHUB_TOKEN"), timeout=60.0)
+azure_git_model = OpenAIChatCompletionsModel(model="gpt-4.1-mini", openai_client=azure_git_client)
+
 INSTRUCTIONS = (
     "You are a research assistant. Given a search term, you search the web for that term and "
     "produce a concise summary of the results. The summary must 2-3 paragraphs and less than 300 "
@@ -12,6 +21,6 @@ search_agent = Agent(
     name="Search agent",
     instructions=INSTRUCTIONS,
     tools=[WebSearchTool(search_context_size="low")],
-    model="gpt-4o-mini",
+    model=azure_git_model,
     model_settings=ModelSettings(tool_choice="required"),
 )
