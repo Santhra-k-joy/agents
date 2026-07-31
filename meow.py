@@ -30,13 +30,3 @@
 # print(response.choices[0].message.content)
 
 import requests
-
-token = '8747831226:AAGEnkeA5F-GzN1kr-FeULXk99ZxPXA8xDQ'
-chat_id = '-1003779911404'
-message = 'Hello Group!'
-
-url = f"https://api.telegram.org/bot{token}/sendMessage"
-payload = {"chat_id": chat_id, "text": message}
-
-response = requests.post(url, data=payload)
-print(response.json())
