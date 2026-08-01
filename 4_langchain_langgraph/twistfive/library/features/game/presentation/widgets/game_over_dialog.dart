@@ -1,33 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:twistfive/app/theme/app_theme.dart';
 import 'package:twistfive/features/game/domain/models/game_status.dart';
 
 class GameOverDialog extends StatelessWidget {
   const GameOverDialog({
     required this.status,
     this.onRestart,
+    this.onHome,
     super.key,
   });
 
   final GameStatus status;
   final VoidCallback? onRestart;
+  final VoidCallback? onHome;
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(_titleFor(status)),
-      content: Text(_messageFor(status)),
+      backgroundColor: AppTheme.cardBg,
+      title: Text(
+        _titleFor(status),
+        style: const TextStyle(color: AppTheme.cream),
+      ),
+      content: Text(
+        _messageFor(status),
+        style: const TextStyle(color: Color(0xFF999999)),
+      ),
       actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Close'),
-        ),
+        if (onHome != null)
+          TextButton(
+            onPressed: onHome,
+            child: const Text('Home', style: TextStyle(color: Color(0xFF888888))),
+          ),
         if (onRestart != null)
           FilledButton(
             onPressed: () {
               Navigator.of(context).pop();
               onRestart?.call();
             },
-            child: const Text('Restart'),
+            child: const Text('Play again'),
           ),
       ],
     );

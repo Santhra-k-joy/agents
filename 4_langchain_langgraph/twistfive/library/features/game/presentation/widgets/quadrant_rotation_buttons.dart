@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:twistfive/app/theme/app_theme.dart';
 import 'package:twistfive/features/game/domain/models/rotation.dart';
 
 class QuadrantRotationButtons extends StatelessWidget {
@@ -19,30 +20,52 @@ class QuadrantRotationButtons extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
-        IconButton.filledTonal(
+        _buildButton(
           key: ValueKey('rotate-${quadrant.name}-counterclockwise'),
           tooltip: 'Rotate ${_displayNameFor(quadrant)} counter-clockwise',
+          icon: Icons.rotate_left,
           onPressed: isEnabled
               ? () => onRotationSelected(RotationDirection.counterclockwise)
               : null,
-          icon: const Icon(Icons.rotate_left),
-          iconSize: 18,
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints.tightFor(width: 36, height: 36),
         ),
         const SizedBox(height: 4),
-        IconButton.filledTonal(
+        _buildButton(
           key: ValueKey('rotate-${quadrant.name}-clockwise'),
           tooltip: 'Rotate ${_displayNameFor(quadrant)} clockwise',
+          icon: Icons.rotate_right,
           onPressed: isEnabled
               ? () => onRotationSelected(RotationDirection.clockwise)
               : null,
-          icon: const Icon(Icons.rotate_right),
-          iconSize: 18,
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints.tightFor(width: 36, height: 36),
         ),
       ],
+    );
+  }
+
+  Widget _buildButton({
+    required Key key,
+    required String tooltip,
+    required IconData icon,
+    required VoidCallback? onPressed,
+  }) {
+    return SizedBox(
+      width: 36,
+      height: 36,
+      child: IconButton(
+        key: key,
+        tooltip: tooltip,
+        onPressed: onPressed,
+        icon: Icon(icon, size: 18),
+        color: AppTheme.gold,
+        disabledColor: const Color(0xFF555555),
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints.tightFor(width: 36, height: 36),
+        style: IconButton.styleFrom(
+          backgroundColor: AppTheme.cardBg,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      ),
     );
   }
 

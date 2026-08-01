@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:twistfive/app/theme/app_theme.dart';
 import 'package:twistfive/features/game/domain/models/game_board_state.dart';
 import 'package:twistfive/features/game/domain/models/rotation.dart';
 import 'package:twistfive/features/game/domain/rules/game_result_resolver.dart';
@@ -117,28 +118,22 @@ class _GameBoardState extends State<GameBoard>
           child: SizedBox(
             width: layoutWidth + (_boardPadding * 2),
             height: layoutHeight + (_boardPadding * 2),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(_boardPadding),
-                child: Column(
-                  children: [
-                    _buildQuadrantRow(
-                      leftQuadrant: Quadrant.topLeft,
-                      rightQuadrant: Quadrant.topRight,
-                      cellSize: cellSize,
-                    ),
-                    const SizedBox(height: _quadrantGap),
-                    _buildQuadrantRow(
-                      leftQuadrant: Quadrant.bottomLeft,
-                      rightQuadrant: Quadrant.bottomRight,
-                      cellSize: cellSize,
-                    ),
-                  ],
-                ),
+            child: Padding(
+              padding: const EdgeInsets.all(_boardPadding),
+              child: Column(
+                children: [
+                  _buildQuadrantRow(
+                    leftQuadrant: Quadrant.topLeft,
+                    rightQuadrant: Quadrant.topRight,
+                    cellSize: cellSize,
+                  ),
+                  const SizedBox(height: _quadrantGap),
+                  _buildQuadrantRow(
+                    leftQuadrant: Quadrant.bottomLeft,
+                    rightQuadrant: Quadrant.bottomRight,
+                    cellSize: cellSize,
+                  ),
+                ],
               ),
             ),
           ),

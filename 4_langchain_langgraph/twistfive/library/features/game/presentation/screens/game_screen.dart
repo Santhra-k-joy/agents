@@ -1,17 +1,26 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:twistfive/app/theme/app_theme.dart';
 import 'package:twistfive/features/game/domain/models/game_difficulty.dart';
 import 'package:twistfive/features/game/domain/models/game_state.dart';
 import 'package:twistfive/features/game/domain/models/game_status.dart';
 import 'package:twistfive/features/game/domain/models/player.dart';
 import 'package:twistfive/features/game/domain/models/rotation.dart';
 import 'package:twistfive/features/game/domain/services/ai_player.dart';
+import 'package:twistfive/features/game/presentation/screens/landing_screen.dart';
 import 'package:twistfive/features/game/presentation/widgets/game_board.dart';
 import 'package:twistfive/features/game/presentation/widgets/game_over_dialog.dart';
 
 class GameScreen extends StatefulWidget {
-  const GameScreen({super.key});
+  const GameScreen({
+    required this.isVsAi,
+    this.difficulty = GameDifficulty.medium,
+    super.key,
+  });
+
+  final bool isVsAi;
+  final GameDifficulty difficulty;
 
   @override
   State<GameScreen> createState() => _GameScreenState();
@@ -19,8 +28,6 @@ class GameScreen extends StatefulWidget {
 
 class _GameScreenState extends State<GameScreen> {
   GameState _gameState = GameState.initial();
-  bool _isVsAi = false;
-  GameDifficulty _difficulty = GameDifficulty.medium;
 
   void _handleCellTap(int row, int column) {
     _updateGameState(_gameState.placeMarble(row, column));
@@ -50,14 +57,14 @@ class _GameScreenState extends State<GameScreen> {
       return;
     }
 
-    if (_isVsAi && updatedGameState.currentPlayer == Player.white) {
+    if (widget.isVsAi && updatedGameState.currentPlayer == Player.white) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted || _gameState.isGameOver || !_isVsAi) {
+        if (!mounted || _gameState.isGameOver || !widget.isVsAi) {
           return;
         }
 
         Future<void>.delayed(const Duration(milliseconds: 700), () {
-          if (!mounted || _gameState.isGameOver || !_isVsAi) {
+          if (!mounted || _gameState.isGameOver || !widget.isVsAi) {
             return;
           }
 
@@ -65,7 +72,7 @@ class _GameScreenState extends State<GameScreen> {
             final move = AiPlayer.choosePlacement(
               board: _gameState.board,
               player: Player.white,
-              difficulty: _difficulty,
+              difficulty: widget.difficulty,
             );
 
             _handleCellTap(move.row, move.column);
@@ -75,7 +82,7 @@ class _GameScreenState extends State<GameScreen> {
           final rotation = AiPlayer.chooseRotation(
             board: _gameState.board,
             player: Player.white,
-            difficulty: _difficulty,
+            difficulty: widget.difficulty,
           );
 
           _completeRotation(rotation.quadrant, rotation.direction);
@@ -90,25 +97,21 @@ class _GameScreenState extends State<GameScreen> {
     });
   }
 
-  void _toggleAi() {
-    setState(() {
-      _isVsAi = !_isVsAi;
-      _gameState = GameState.initial();
-    });
-  }
-
-  void _selectDifficulty(GameDifficulty difficulty) {
-    setState(() {
-      _difficulty = difficulty;
-    });
-  }
-
   void _showGameOverDialog(GameStatus status) {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (context) =>
-          GameOverDialog(status: status, onRestart: _restartGame),
+      builder: (context) => GameOverDialog(
+        status: status,
+        onRestart: _restartGame,
+        onHome: () {
+          Navigator.of(context).pop();
+          Navigator.of(this.context).pushAndRemoveUntil(
+            MaterialPageRoute<void>(builder: (_) => const LandingScreen()),
+            (route) => false,
+          );
+        },
+      ),
     );
   }
 
@@ -118,62 +121,24 @@ class _GameScreenState extends State<GameScreen> {
     final isPlacementPhase = _gameState.isPlacementPhase;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('TwistFive')),
+      appBar: AppBar(
+        title: const Text('TwistFive'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: () {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute<void>(builder: (_) => const LandingScreen()),
+              (route) => false,
+            );
+          },
+        ),
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      _gameState.isGameOver
-                          ? 'Game over'
-                          : isPlacementPhase
-                          ? '${currentPlayer.displayName}: place a marble'
-                          : '${currentPlayer.displayName}: rotate a quadrant',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  ),
-                  SegmentedButton<GameDifficulty>(
-                    segments: const [
-                      ButtonSegment(
-                        value: GameDifficulty.easy,
-                        label: Text('Easy'),
-                      ),
-                      ButtonSegment(
-                        value: GameDifficulty.medium,
-                        label: Text('Med'),
-                      ),
-                      ButtonSegment(
-                        value: GameDifficulty.hard,
-                        label: Text('Hard'),
-                      ),
-                      ButtonSegment(
-                        value: GameDifficulty.extremeHard,
-                        label: Text('Extreme'),
-                      ),
-                    ],
-                    selected: {_difficulty},
-                    onSelectionChanged: (selection) {
-                      _selectDifficulty(selection.first);
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(_isVsAi ? 'AI opponent: on' : 'AI opponent: off'),
-                  FilledButton.tonal(
-                    onPressed: _toggleAi,
-                    child: Text(_isVsAi ? 'Disable AI' : 'Play vs AI'),
-                  ),
-                ],
-              ),
+              _buildStatusBar(context, currentPlayer, isPlacementPhase),
               const SizedBox(height: 16),
               Expanded(
                 child: GameBoard(
@@ -191,6 +156,63 @@ class _GameScreenState extends State<GameScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildStatusBar(
+    BuildContext context,
+    Player currentPlayer,
+    bool isPlacementPhase,
+  ) {
+    final statusText = _gameState.isGameOver
+        ? 'Game over'
+        : isPlacementPhase
+            ? '${currentPlayer.displayName}: place a marble'
+            : '${currentPlayer.displayName}: rotate a quadrant';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppTheme.cardBg,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 12,
+            height: 12,
+            decoration: BoxDecoration(
+              color: currentPlayer == Player.black
+                  ? const Color(0xFF555555)
+                  : AppTheme.cream,
+              shape: BoxShape.circle,
+              border: Border.all(color: AppTheme.gold, width: 1),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              statusText,
+              style: const TextStyle(color: AppTheme.cream, fontSize: 15),
+            ),
+          ),
+          if (widget.isVsAi)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                border: Border.all(color: const Color(0xFF444444)),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                widget.difficulty.label,
+                style: const TextStyle(
+                  color: Color(0xFF888888),
+                  fontSize: 12,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:twistfive/app/theme/app_theme.dart';
-import 'package:twistfive/features/game/presentation/screens/game_screen.dart';
+import 'package:twistfive/features/game/presentation/screens/landing_screen.dart';
 
 class TwistFiveApp extends StatelessWidget {
   const TwistFiveApp({super.key});
@@ -10,8 +10,8 @@ class TwistFiveApp extends StatelessWidget {
     return MaterialApp(
       title: 'TwistFive',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
-      home: const GameScreen(),
+      theme: AppTheme.dark,
+      home: const LandingScreen(),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:twistfive/app/theme/app_theme.dart';
 import 'package:twistfive/features/game/domain/models/game_board_state.dart';
 import 'package:twistfive/features/game/domain/models/rotation.dart';
 import 'package:twistfive/features/game/domain/rules/game_result_resolver.dart';
@@ -27,8 +28,13 @@ class BoardQuadrant extends StatelessWidget {
     final quadrantSize =
         (cellSize * GameBoardState.quadrantSize) + (cellGap * 2);
 
-    return SizedBox.square(
-      dimension: quadrantSize,
+    return Container(
+      width: quadrantSize,
+      height: quadrantSize,
+      decoration: BoxDecoration(
+        color: AppTheme.boardWood,
+        borderRadius: BorderRadius.circular(10),
+      ),
       child: Column(
         children: [
           for (

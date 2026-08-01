@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:twistfive/app/theme/app_theme.dart';
 import 'package:twistfive/features/game/domain/models/player.dart';
 
 class BoardCell extends StatelessWidget {
@@ -21,7 +22,6 @@ class BoardCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderRadius = BorderRadius.circular(10);
     final isEmpty = player == null;
     final canTap = isEmpty && onTap != null;
 
@@ -34,18 +34,25 @@ class BoardCell extends StatelessWidget {
             ? 'Empty cell, row ${row + 1}, column ${column + 1}'
             : '${player!.displayName} marble, row ${row + 1}, '
                   'column ${column + 1}',
-        child: Material(
-          color: isWinningCell
-              ? Theme.of(context).colorScheme.secondaryContainer
-              : Theme.of(context).colorScheme.surfaceContainerHighest,
-          shape: RoundedRectangleBorder(borderRadius: borderRadius),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: canTap ? () => onTap!(row, column) : null,
+        child: GestureDetector(
+          onTap: canTap ? () => onTap!(row, column) : null,
+          child: Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFF2A1F14),
+              shape: BoxShape.circle,
+              border: isWinningCell
+                  ? Border.all(color: AppTheme.gold, width: 2)
+                  : null,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.4),
+                  blurRadius: 3,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
             child: Center(
-              child: isEmpty
-                  ? null
-                  : _buildMarble(context, player!, isWinningCell),
+              child: isEmpty ? null : _buildMarble(player!),
             ),
           ),
         ),
@@ -53,38 +60,38 @@ class BoardCell extends StatelessWidget {
     );
   }
 
-  Widget _buildMarble(
-    BuildContext context,
-    Player marbleOwner,
-    bool isWinningCell,
-  ) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final marbleColor = marbleOwner == Player.black
-        ? colorScheme.onSurface
-        : colorScheme.surface;
+  Widget _buildMarble(Player marbleOwner) {
+    final isWhite = marbleOwner == Player.white;
+    final baseColor = isWhite ? AppTheme.cream : const Color(0xFF555555);
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 400),
-      width: size * 0.7,
-      height: size * 0.7,
+    return Container(
+      width: size * 0.72,
+      height: size * 0.72,
       decoration: BoxDecoration(
-        color: marbleColor,
         shape: BoxShape.circle,
-        border: Border.all(
-          color: isWinningCell ? colorScheme.primary : colorScheme.outline,
-          width: isWinningCell ? 3 : 1.5,
+        gradient: RadialGradient(
+          center: const Alignment(-0.3, -0.3),
+          colors: [
+            isWhite ? Colors.white : const Color(0xFF888888),
+            baseColor,
+            isWhite ? const Color(0xFFCCC0A8) : const Color(0xFF333333),
+          ],
+          stops: const [0.0, 0.5, 1.0],
         ),
-        boxShadow: isWinningCell
-            ? [
-                BoxShadow(
-                  color: colorScheme.primary.withValues(alpha: 0.35),
-                  blurRadius: 10,
-                  spreadRadius: 2,
-                ),
-              ]
-            : null,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.5),
+            blurRadius: 4,
+            offset: const Offset(1, 2),
+          ),
+          if (isWinningCell)
+            BoxShadow(
+              color: AppTheme.gold.withValues(alpha: 0.4),
+              blurRadius: 8,
+              spreadRadius: 2,
+            ),
+        ],
       ),
-      child: const SizedBox.shrink(),
     );
   }
 }
