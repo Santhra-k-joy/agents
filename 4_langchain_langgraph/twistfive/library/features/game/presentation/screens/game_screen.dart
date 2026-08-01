@@ -145,11 +145,15 @@ class _GameScreenState extends State<GameScreen> {
                       ),
                       ButtonSegment(
                         value: GameDifficulty.medium,
-                        label: Text('Medium'),
+                        label: Text('Med'),
                       ),
                       ButtonSegment(
                         value: GameDifficulty.hard,
                         label: Text('Hard'),
+                      ),
+                      ButtonSegment(
+                        value: GameDifficulty.extremeHard,
+                        label: Text('Extreme'),
                       ),
                     ],
                     selected: {_difficulty},
